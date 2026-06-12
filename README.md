@@ -1,4 +1,4 @@
-# Elon wealth scroll
+# Elons wealth to scale
 
 Elon Musk's fortune as a horizontal strip where **1 pixel = $1,000** — no compressed scale. At ~$982 billion (Forbes, June 2026) the strip is 982 million pixels long, roughly 260 km of screen. Scroll it, drag it, or hit the turbo buttons; even at 10,000× auto-scroll the trip takes about 49 seconds.
 
