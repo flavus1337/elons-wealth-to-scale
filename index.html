@@ -30,19 +30,18 @@ h1{font-size:30px;font-weight:600;margin:0 0 8px}
 .progress{height:6px;background:var(--surface);border-radius:3px;margin:12px 0 6px;overflow:hidden}
 .progress>div{height:100%;width:0;background:var(--green)}
 .note{font-size:13px;color:var(--faint);margin:0 0 14px}
-.breakout{width:min(96vw,1240px);position:relative;left:50%;transform:translateX(-50%)}
-#stage{position:relative;height:400px;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:grab;touch-action:pan-y;background:var(--card);outline:none;-webkit-user-select:none;user-select:none}
+#stage{position:relative;width:min(96vw,1240px);left:50%;transform:translateX(-50%);height:400px;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:grab;touch-action:pan-y;background:var(--card);outline:none;-webkit-user-select:none;user-select:none}
 #stage:focus-visible{border-color:var(--green)}
 .tick{position:absolute;bottom:0;width:1px;background:var(--border);height:10px}
 .tick.maj{height:16px;background:var(--border-strong)}
 .ticklab{position:absolute;bottom:18px;font-size:11px;color:var(--faint);transform:translateX(-50%);white-space:nowrap}
-.mkline{position:absolute;top:14px;width:2px;background:var(--accent);display:none;z-index:1}
+#ticks{position:absolute;left:0;right:0;top:0;bottom:76px}
+.mkline{position:absolute;top:14px;bottom:74px;width:2px;background:var(--accent);display:none;z-index:1}
 .mkcard{position:absolute;top:14px;width:262px;background:var(--card);border:1px solid var(--border-strong);border-radius:8px;padding:10px 14px;display:none;z-index:2}
 .mkcard p{margin:0;font-size:13px;line-height:1.5}
 .mkcard .t{font-weight:600}
 .mkcard .s{color:var(--muted);margin-top:3px}
 #bar{position:absolute;top:330px;left:0;height:38px;width:100%;background:var(--green)}
-#endcap{position:absolute;top:322px;width:4px;height:54px;background:var(--accent);display:none}
 #hint{position:absolute;left:14px;bottom:6px;font-size:12px;color:var(--muted)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 4px}
 .row span.lbl{font-size:13px;color:var(--muted)}
@@ -65,7 +64,6 @@ footer a{color:inherit}
   .pct{display:block;margin:4px 0 0}
   #stage{height:480px}
   #bar{top:410px}
-  #endcap{top:402px}
   button{padding:8px 12px}
 }
 </style>
@@ -83,14 +81,11 @@ footer a{color:inherit}
   <div class="progress"><div id="prog"></div></div>
   <p class="note">Scroll, drag, or use arrow keys inside the strip (shift for bigger steps).</p>
 
-  <div class="breakout">
   <div id="stage" tabindex="0" role="application" aria-label="Wealth strip, scroll horizontally">
-    <div id="ticks" style="position:absolute;left:0;right:0;top:0;height:324px"></div>
+    <div id="ticks"></div>
     <div id="mks" style="position:absolute;inset:0"></div>
     <div id="bar"></div>
-    <div id="endcap"></div>
     <div id="hint"></div>
-  </div>
   </div>
 
   <div class="row">
@@ -129,7 +124,7 @@ footer a{color:inherit}
 <script>
 const TOTAL=982e9,DPP=1000;
 let pos=0,speed=0,last=null;
-const stage=document.getElementById('stage'),ticks=document.getElementById('ticks'),mksEl=document.getElementById('mks'),bar=document.getElementById('bar'),endcap=document.getElementById('endcap'),big=document.getElementById('big'),pctEl=document.getElementById('pct'),prog=document.getElementById('prog'),hint=document.getElementById('hint'),eta=document.getElementById('eta');
+const stage=document.getElementById('stage'),ticks=document.getElementById('ticks'),mksEl=document.getElementById('mks'),bar=document.getElementById('bar'),big=document.getElementById('big'),pctEl=document.getElementById('pct'),prog=document.getElementById('prog'),hint=document.getElementById('hint'),eta=document.getElementById('eta');
 const MK=[
  [1e3,"This is $1,000","One single pixel on this strip."],
  [62e3,"Median US full-time salary","About one year of typical work: ~$62,000."],
@@ -176,8 +171,6 @@ function render(){
  pctEl.textContent=p.toFixed(5)+'% of the way';
  prog.style.width=p+'%';
  bar.style.width=Math.max(0,Math.min(vw,(TOTAL-pos)/DPP))+'px';
- const ex=(TOTAL-pos)/DPP;
- if(ex>=-4&&ex<=vw){endcap.style.display='block';endcap.style.left=Math.min(vw-4,ex)+'px';}else endcap.style.display='none';
  let th='';
  for(let t=Math.ceil(pos/1e5)*1e5;t<=pos+span;t+=1e5){
   const x=(t-pos)/DPP,maj=t%1e6===0;
@@ -187,7 +180,6 @@ function render(){
  ticks.innerHTML=th;
  let nxt=null;
  const barTop=bar.offsetTop,CW=Math.min(262,vw-24),LANEH=Math.floor((barTop-26)/3),lanes=[-1e9,-1e9,-1e9];
- ticks.style.height=(barTop-6)+'px';
  MK.forEach(function(m){
   const x=(m.d-pos)/DPP;
   if(x<-20||x>vw+CW+8){m.line.style.display='none';m.card.style.display='none';}
@@ -196,7 +188,7 @@ function render(){
    let lane=0;
    for(let i=0;i<lanes.length;i++){if(cl>=lanes[i]+10){lane=i;break;}if(i===lanes.length-1)lane=i;}
    lanes[lane]=cl+CW+8;
-   m.line.style.display='block';m.line.style.left=Math.max(0,Math.min(vw-2,x))+'px';m.line.style.height=(barTop-18)+'px';
+   m.line.style.display='block';m.line.style.left=Math.max(0,Math.min(vw-2,x))+'px';
    m.card.style.display='block';m.card.style.width=CW+'px';m.card.style.left=cl+'px';m.card.style.top=(14+lane*LANEH)+'px';
   }
   if(!nxt&&m.d-pos>span)nxt=m;
@@ -213,7 +205,7 @@ function loop(ts){
  }
  last=ts;render();requestAnimationFrame(loop);
 }
-const spBtns=Array.prototype.slice.call(document.querySelectorAll('[data-speed]'));
+const spBtns=document.querySelectorAll('[data-speed]');
 function setSpeed(s){speed=s;spBtns.forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.speed===s));});}
 spBtns.forEach(function(b){b.addEventListener('click',function(){setSpeed(+b.dataset.speed);});});
 document.querySelectorAll('[data-jump]').forEach(function(b){
