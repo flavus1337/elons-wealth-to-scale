@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elon Musk's wealth, one pixel at a time</title>
+<meta name="description" content="Elon Musk's ~$982 billion fortune visualized as a strip where 1 pixel = $1,000. Scroll it. All of it. Good luck.">
+<style>
+:root{
+  --bg:#ffffff;--surface:#f4f3ef;--card:#ffffff;
+  --text:#1a1a18;--muted:#6b6a64;--faint:#9b9a92;
+  --border:rgba(0,0,0,0.14);--border-strong:rgba(0,0,0,0.3);
+  --green:#1D9E75;--accent:#D85A30;--accent-text:#993C1D;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#161614;--surface:#232320;--card:#1d1d1b;
+    --text:#eceae4;--muted:#a3a29a;--faint:#74736c;
+    --border:rgba(255,255,255,0.16);--border-strong:rgba(255,255,255,0.34);
+    --green:#1D9E75;--accent:#F0997B;--accent-text:#F5C4B3;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+main{max-width:760px;margin:0 auto;padding:48px 20px 80px}
+h1{font-size:30px;font-weight:600;margin:0 0 8px}
+.sub{color:var(--muted);font-size:16px;margin:0 0 32px}
+.counter{font-size:32px;font-weight:600;font-variant-numeric:tabular-nums}
+.pct{font-size:14px;color:var(--muted);margin-left:12px}
+.progress{height:6px;background:var(--surface);border-radius:3px;margin:12px 0 6px;overflow:hidden}
+.progress>div{height:100%;width:0;background:var(--green)}
+.note{font-size:13px;color:var(--faint);margin:0 0 14px}
+#stage{position:relative;height:240px;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;background:var(--card);outline:none}
+#stage:focus-visible{border-color:var(--green)}
+.tick{position:absolute;bottom:0;width:1px;background:var(--border);height:10px}
+.tick.maj{height:16px;background:var(--border-strong)}
+.ticklab{position:absolute;bottom:18px;font-size:11px;color:var(--faint);transform:translateX(-50%);white-space:nowrap}
+.mkline{position:absolute;top:14px;width:2px;background:var(--accent);display:none}
+.mkcard{position:absolute;top:14px;width:262px;background:var(--card);border:1px solid var(--border-strong);border-radius:8px;padding:10px 14px;display:none}
+.mkcard p{margin:0;font-size:13px;line-height:1.5}
+.mkcard .t{font-weight:600}
+.mkcard .s{color:var(--muted);margin-top:3px}
+#bar{position:absolute;top:168px;left:0;height:38px;width:100%;background:var(--green)}
+#endcap{position:absolute;top:160px;width:4px;height:54px;background:var(--accent);display:none}
+#hint{position:absolute;left:14px;bottom:6px;font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 4px}
+.row span.lbl{font-size:13px;color:var(--muted)}
+button{font:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer}
+button:hover{background:var(--surface)}
+button[aria-pressed="true"]{border-color:var(--green);color:var(--green)}
+#eta{font-size:12px;color:var(--faint)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:32px}
+.card{background:var(--surface);border-radius:10px;padding:14px 16px}
+.card .lb{font-size:12px;color:var(--muted);margin:0 0 4px}
+.card .vl{font-size:22px;font-weight:600;margin:0}
+footer{margin-top:48px;font-size:13px;color:var(--muted)}
+footer a{color:inherit}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<main>
+  <h1>How rich is Elon Musk?</h1>
+  <p class="sub">This strip is his fortune. <strong>1 pixel = $1,000.</strong> No compressed scale, no log axis — the strip is 982 million pixels (~260&nbsp;km of screen) long. Scroll it if you can. Figures as of June&nbsp;2026.</p>
+
+  <h2 class="sr-only">Interactive strip where one pixel equals one thousand dollars of Elon Musk's 982 billion dollar net worth</h2>
+
+  <div>
+    <span class="counter" id="big">$0</span><span class="pct" id="pct">0.00000% of the way</span>
+  </div>
+  <div class="progress"><div id="prog"></div></div>
+  <p class="note">Scroll, drag, or use arrow keys inside the strip (shift for bigger steps).</p>
+
+  <div id="stage" tabindex="0" role="application" aria-label="Wealth strip, scroll horizontally">
+    <div id="ticks" style="position:absolute;left:0;right:0;top:0;height:162px"></div>
+    <div id="mks" style="position:absolute;inset:0"></div>
+    <div id="bar"></div>
+    <div id="endcap"></div>
+    <div id="hint"></div>
+  </div>
+
+  <div class="row">
+    <span class="lbl">Auto-scroll:</span>
+    <button data-speed="0" aria-pressed="true">Pause</button>
+    <button data-speed="2000">Cruise ($2M/s)</button>
+    <button data-speed="200000">&times;100</button>
+    <button data-speed="20000000">&times;10,000</button>
+    <span id="eta"></span>
+  </div>
+  <div class="row">
+    <span class="lbl">Jump to:</span>
+    <button data-jump="0">Start</button>
+    <button data-jump="1000000">$1M</button>
+    <button data-jump="1000000000">$1B</button>
+    <button data-jump="100000000000">$100B</button>
+    <button data-jump="491000000000">Halfway</button>
+    <button data-jump="982000000000">The end</button>
+  </div>
+
+  <div class="cards">
+    <div class="card"><p class="lb">Average earned per second since birth (1971)</p><p class="vl">$566</p></div>
+    <div class="card"><p class="lb">Median-wealth US households needed to match</p><p class="vl">5.1 million</p></div>
+    <div class="card"><p class="lb">If split between every human on Earth</p><p class="vl">$120 each</p></div>
+    <div class="card"><p class="lb">US student debt — still bigger than his fortune</p><p class="vl">$1.77T</p></div>
+  </div>
+
+  <footer>
+    <p>Net worth: $971B per the <a href="https://www.bloomberg.com/billionaires/profiles/elon-r-musk/">Bloomberg Billionaires Index</a>, $982B per Forbes (June 2026, pre-SpaceX-IPO). Reference points: BLS median earnings, Fed Survey of Consumer Finances, HUD homelessness count, UN/WFP hunger estimate — some are widely cited approximations.</p>
+    <p>Inspired by <a href="https://eattherichtextformat.github.io/1-pixel-wealth/">1 Pixel Wealth</a>. Not affiliated. Built for perspective, not financial advice.</p>
+  </footer>
+</main>
+
+<script>
+const TOTAL=982e9,DPP=1000;
+let pos=0,speed=0,last=null;
+const stage=document.getElementById('stage'),ticks=document.getElementById('ticks'),mksEl=document.getElementById('mks'),bar=document.getElementById('bar'),endcap=document.getElementById('endcap'),big=document.getElementById('big'),pctEl=document.getElementById('pct'),prog=document.getElementById('prog'),hint=document.getElementById('hint'),eta=document.getElementById('eta');
+const MK=[
+ [1e3,"This is $1,000","One single pixel on this strip."],
+ [62e3,"Median US full-time salary","About one year of typical work: ~$62,000."],
+ [193e3,"Median US household net worth","$193,000 — half of American households own less than this sliver."],
+ [1e6,"You're a millionaire","1,000 pixels scrolled. That's 0.0001% of the strip."],
+ [1.7e6,"An entire working life","~$1.7M: what a typical American earns from age 18 to retirement."],
+ [11.6e6,"Welcome to the top 1%","~$11.6M of household wealth gets you into the US 1%."],
+ [1e8,"$100 million","Spend $5,000 every day and this lasts 55 years. You're 0.01% of the way."],
+ [1e9,"One billion dollars","You are now a billionaire — and 0.1% of the way there."],
+ [25e9,"NASA's entire annual budget","~$25B. He could fund it about 39 times over."],
+ [40e9,"End world hunger for a year","~$40B: the UN estimate to feed everyone on Earth for one year."],
+ [77e9,"$100,000 to every homeless American","All ~771,000 of them — and barely a dent."],
+ [1e11,"$100 billion","More than the GDP of ~130 countries. 10% of the way."],
+ [25e10,"The world's #2 richest, roughly","Everyone else's entire fortune fits way back here."],
+ [491e9,"Halfway","Congratulations — most people give up long before this point."],
+ [971e9,"Bloomberg's estimate","$971,000,000,000 as of June 2026."],
+ [982e9,"The end — Forbes' estimate","$982,000,000,000. The SpaceX IPO may push it past $1 trillion."]
+].map(function(m){
+ const line=document.createElement('div');line.className='mkline';
+ const card=document.createElement('div');card.className='mkcard';
+ card.innerHTML='<p class="t">'+m[1]+'</p><p class="s">'+m[2]+'</p>';
+ mksEl.appendChild(line);mksEl.appendChild(card);
+ return{d:m[0],t:m[1],line:line,card:card};
+});
+function fmt(d){return '$'+Math.round(d).toLocaleString('en-US');}
+function fmtC(d){if(d>=1e9)return '$'+parseFloat((d/1e9).toFixed(3))+'B';if(d>=1e6)return '$'+parseFloat((d/1e6).toFixed(3))+'M';return '$'+parseFloat((d/1e3).toFixed(1))+'k';}
+function fmtT(s){if(s<90)return Math.round(s)+' seconds';if(s<5400)return Math.round(s/60)+' minutes';if(s<172800)return (s/3600).toFixed(1)+' hours';return (s/86400).toFixed(1)+' days';}
+function clampPos(){pos=Math.min(Math.max(pos,0),TOTAL);}
+function render(){
+ const vw=stage.clientWidth,span=vw*DPP;
+ big.textContent=fmt(pos);
+ const p=pos/TOTAL*100;
+ pctEl.textContent=p.toFixed(5)+'% of the way';
+ prog.style.width=p+'%';
+ bar.style.width=Math.max(0,Math.min(vw,(TOTAL-pos)/DPP))+'px';
+ const ex=(TOTAL-pos)/DPP;
+ if(ex>=-4&&ex<=vw){endcap.style.display='block';endcap.style.left=Math.min(vw-4,ex)+'px';}else endcap.style.display='none';
+ let th='';
+ for(let t=Math.ceil(pos/1e5)*1e5;t<=pos+span;t+=1e5){
+  const x=(t-pos)/DPP,maj=t%1e6===0;
+  th+='<div class="tick'+(maj?' maj':'')+'" style="left:'+x.toFixed(1)+'px"></div>';
+  if(maj&&t>0)th+='<div class="ticklab" style="left:'+x.toFixed(1)+'px">'+fmtC(t)+'</div>';
+ }
+ ticks.innerHTML=th;
+ let nxt=null;
+ MK.forEach(function(m){
+  const x=(m.d-pos)/DPP;
+  if(x<-20||x>vw+270){m.line.style.display='none';m.card.style.display='none';}
+  else{
+   m.line.style.display='block';m.line.style.left=Math.max(0,Math.min(vw-2,x))+'px';m.line.style.height='150px';
+   m.card.style.display='block';m.card.style.left=Math.max(8,Math.min(vw-278,x+8))+'px';
+  }
+  if(!nxt&&m.d-pos>span)nxt=m;
+ });
+ if(nxt){const dist=nxt.d-pos-span;hint.textContent='Next: '+nxt.t+' — '+fmtC(dist)+' ahead ('+Math.round(dist/DPP).toLocaleString('en-US')+' px)';}
+ else hint.textContent=pos>=TOTAL?'That’s it. That was one fortune.':'';
+ eta.textContent=speed>0?'At this speed, the end is '+fmtT((TOTAL-pos)/DPP/speed)+' away':'';
+}
+function loop(ts){
+ if(last!=null&&speed>0){pos+=speed*DPP*(ts-last)/1000;clampPos();if(pos>=TOTAL)setSpeed(0);}
+ last=ts;render();requestAnimationFrame(loop);
+}
+const spBtns=Array.prototype.slice.call(document.querySelectorAll('[data-speed]'));
+function setSpeed(s){speed=s;spBtns.forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.speed===s));});}
+spBtns.forEach(function(b){b.addEventListener('click',function(){setSpeed(+b.dataset.speed);});});
+document.querySelectorAll('[data-jump]').forEach(function(b){
+ b.addEventListener('click',function(){const vw=stage.clientWidth;pos=Math.max(0,+b.dataset.jump-vw*DPP*0.55);clampPos();setSpeed(0);});
+});
+stage.addEventListener('wheel',function(e){e.preventDefault();pos+=(Math.abs(e.deltaY)>Math.abs(e.deltaX)?e.deltaY:e.deltaX)*DPP;clampPos();},{passive:false});
+let drag=null;
+stage.addEventListener('pointerdown',function(e){drag=e.clientX;stage.setPointerCapture(e.pointerId);stage.style.cursor='grabbing';});
+stage.addEventListener('pointermove',function(e){if(drag!=null){pos-=(e.clientX-drag)*DPP;clampPos();drag=e.clientX;}});
+stage.addEventListener('pointerup',function(){drag=null;stage.style.cursor='grab';});
+stage.addEventListener('keydown',function(e){
+ if(e.key==='ArrowRight'){pos+=(e.shiftKey?500:50)*DPP;clampPos();e.preventDefault();}
+ if(e.key==='ArrowLeft'){pos-=(e.shiftKey?500:50)*DPP;clampPos();e.preventDefault();}
+});
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
