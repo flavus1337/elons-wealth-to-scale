@@ -30,18 +30,19 @@ h1{font-size:30px;font-weight:600;margin:0 0 8px}
 .progress{height:6px;background:var(--surface);border-radius:3px;margin:12px 0 6px;overflow:hidden}
 .progress>div{height:100%;width:0;background:var(--green)}
 .note{font-size:13px;color:var(--faint);margin:0 0 14px}
-#stage{position:relative;height:240px;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;background:var(--card);outline:none}
+.breakout{width:min(96vw,1240px);position:relative;left:50%;transform:translateX(-50%)}
+#stage{position:relative;height:400px;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;background:var(--card);outline:none}
 #stage:focus-visible{border-color:var(--green)}
 .tick{position:absolute;bottom:0;width:1px;background:var(--border);height:10px}
 .tick.maj{height:16px;background:var(--border-strong)}
 .ticklab{position:absolute;bottom:18px;font-size:11px;color:var(--faint);transform:translateX(-50%);white-space:nowrap}
-.mkline{position:absolute;top:14px;width:2px;background:var(--accent);display:none}
-.mkcard{position:absolute;top:14px;width:262px;background:var(--card);border:1px solid var(--border-strong);border-radius:8px;padding:10px 14px;display:none}
+.mkline{position:absolute;top:14px;width:2px;background:var(--accent);display:none;z-index:1}
+.mkcard{position:absolute;top:14px;width:262px;background:var(--card);border:1px solid var(--border-strong);border-radius:8px;padding:10px 14px;display:none;z-index:2}
 .mkcard p{margin:0;font-size:13px;line-height:1.5}
 .mkcard .t{font-weight:600}
 .mkcard .s{color:var(--muted);margin-top:3px}
-#bar{position:absolute;top:168px;left:0;height:38px;width:100%;background:var(--green)}
-#endcap{position:absolute;top:160px;width:4px;height:54px;background:var(--accent);display:none}
+#bar{position:absolute;top:330px;left:0;height:38px;width:100%;background:var(--green)}
+#endcap{position:absolute;top:322px;width:4px;height:54px;background:var(--accent);display:none}
 #hint{position:absolute;left:14px;bottom:6px;font-size:12px;color:var(--muted)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 4px}
 .row span.lbl{font-size:13px;color:var(--muted)}
@@ -61,7 +62,7 @@ footer a{color:inherit}
 <body>
 <main>
   <h1>How rich is Elon Musk?</h1>
-  <p class="sub">This strip is his fortune. <strong>1 pixel = $1,000.</strong> No compressed scale, no log axis — the strip is 982 million pixels (~260&nbsp;km of screen) long. Scroll it if you can. Figures as of June&nbsp;2026.</p>
+  <p class="sub">This strip is his fortune. <strong>1 pixel = $1,000.</strong> No compressed scale, no log axis — the strip is 982 million pixels (~260&nbsp;km of screen) long. For perspective: the $400 emergency expense that nearly 40% of Americans struggle to cover is less than half a pixel here. Scroll it if you can. Figures as of June&nbsp;2026.</p>
 
   <h2 class="sr-only">Interactive strip where one pixel equals one thousand dollars of Elon Musk's 982 billion dollar net worth</h2>
 
@@ -71,12 +72,14 @@ footer a{color:inherit}
   <div class="progress"><div id="prog"></div></div>
   <p class="note">Scroll, drag, or use arrow keys inside the strip (shift for bigger steps).</p>
 
+  <div class="breakout">
   <div id="stage" tabindex="0" role="application" aria-label="Wealth strip, scroll horizontally">
-    <div id="ticks" style="position:absolute;left:0;right:0;top:0;height:162px"></div>
+    <div id="ticks" style="position:absolute;left:0;right:0;top:0;height:324px"></div>
     <div id="mks" style="position:absolute;inset:0"></div>
     <div id="bar"></div>
     <div id="endcap"></div>
     <div id="hint"></div>
+  </div>
   </div>
 
   <div class="row">
@@ -102,6 +105,8 @@ footer a{color:inherit}
     <div class="card"><p class="lb">Median-wealth US households needed to match</p><p class="vl">5.1 million</p></div>
     <div class="card"><p class="lb">If split between every human on Earth</p><p class="vl">$120 each</p></div>
     <div class="card"><p class="lb">US student debt — still bigger than his fortune</p><p class="vl">$1.77T</p></div>
+    <div class="card"><p class="lb">Daily spending needed to burn it all by age 80</p><p class="vl">$34M/day</p></div>
+    <div class="card"><p class="lb">Years to earn it on a $100k salary</p><p class="vl">9.8 million</p></div>
   </div>
 
   <footer>
@@ -118,17 +123,28 @@ const MK=[
  [1e3,"This is $1,000","One single pixel on this strip."],
  [62e3,"Median US full-time salary","About one year of typical work: ~$62,000."],
  [193e3,"Median US household net worth","$193,000 — half of American households own less than this sliver."],
+ [42e4,"A median American home","~$420,000 buys the typical US house. He could buy 2.3 million of them."],
  [1e6,"You're a millionaire","1,000 pixels scrolled. That's 0.0001% of the strip."],
  [1.7e6,"An entire working life","~$1.7M: what a typical American earns from age 18 to retirement."],
  [11.6e6,"Welcome to the top 1%","~$11.6M of household wealth gets you into the US 1%."],
  [1e8,"$100 million","Spend $5,000 every day and this lasts 55 years. You're 0.01% of the way."],
- [1e9,"One billion dollars","You are now a billionaire — and 0.1% of the way there."],
+ [42e7,"A brand-new Boeing 747","~$420M at list price. He could buy the entire 747 fleet ever in service."],
+ [6e8,"Azzam, a 180m superyacht","~$600M: one of the most expensive yachts ever built. Pocket change ahead."],
+ [1e9,"One billion dollars","You are now a billionaire — and 0.1% of the way there. Stack $100 bills: this pile is 1 km tall."],
+ [1e10,"The James Webb Space Telescope","~$10B — 30 years of work by thousands of scientists. He could fund 98 of them."],
+ [13e9,"The USS Gerald R. Ford","~$13B: the most expensive warship ever constructed."],
  [25e9,"NASA's entire annual budget","~$25B. He could fund it about 39 times over."],
  [40e9,"End world hunger for a year","~$40B: the UN estimate to feed everyone on Earth for one year."],
+ [44e9,"Twitter","$44B: what he actually paid for it in 2022. Less than 5% of the strip."],
  [77e9,"$100,000 to every homeless American","All ~771,000 of them — and barely a dent."],
  [1e11,"$100 billion","More than the GDP of ~130 countries. 10% of the way."],
+ [22e10,"Every US public school teacher, paid for a year","All 3.2 million of them, ~$220B — with three quarters of the strip left over."],
  [25e10,"The world's #2 richest, roughly","Everyone else's entire fortune fits way back here."],
- [491e9,"Halfway","Congratulations — most people give up long before this point."],
+ [257e9,"The entire Apollo program","~$257B inflation-adjusted: every Moon mission, 1961–1973."],
+ [3e11,"Finland","~$300B: the annual GDP of an entire Nordic country, population 5.6 million."],
+ [491e9,"Halfway","Congratulations — most people give up long before this point. The $100-bill stack is now 491 km tall."],
+ [68e10,"Walmart's annual revenue","~$680B: everything 255 million weekly customers spend there in a year."],
+ [85e10,"Nearly the Pentagon's annual budget","The US military costs ~$850–900B per year. One man could almost cover it."],
  [971e9,"Bloomberg's estimate","$971,000,000,000 as of June 2026."],
  [982e9,"The end — Forbes' estimate","$982,000,000,000. The SpaceX IPO may push it past $1 trillion."]
 ].map(function(m){
@@ -159,12 +175,17 @@ function render(){
  }
  ticks.innerHTML=th;
  let nxt=null;
+ const CARDW=270,LANEH=102,lanes=[-1e9,-1e9,-1e9];
  MK.forEach(function(m){
   const x=(m.d-pos)/DPP;
   if(x<-20||x>vw+270){m.line.style.display='none';m.card.style.display='none';}
   else{
-   m.line.style.display='block';m.line.style.left=Math.max(0,Math.min(vw-2,x))+'px';m.line.style.height='150px';
-   m.card.style.display='block';m.card.style.left=Math.max(8,Math.min(vw-278,x+8))+'px';
+   const cl=Math.max(8,Math.min(vw-CARDW-8,x+8));
+   let lane=0;
+   for(let i=0;i<lanes.length;i++){if(cl>=lanes[i]+10){lane=i;break;}if(i===lanes.length-1)lane=i;}
+   lanes[lane]=cl+CARDW;
+   m.line.style.display='block';m.line.style.left=Math.max(0,Math.min(vw-2,x))+'px';m.line.style.height='312px';
+   m.card.style.display='block';m.card.style.left=cl+'px';m.card.style.top=(14+lane*LANEH)+'px';
   }
   if(!nxt&&m.d-pos>span)nxt=m;
  });
